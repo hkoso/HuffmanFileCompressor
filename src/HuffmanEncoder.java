@@ -14,6 +14,9 @@ public class HuffmanEncoder {
 
     private long bitCount;
 
+    public HuffmanEncoder() throws IOException {
+        this.bitCount = 0;
+    }
     public HuffmanEncoder(File originFile) throws IOException {
         this.bitCount = 0;
         this.originFile = originFile;
@@ -21,21 +24,36 @@ public class HuffmanEncoder {
         frequencyInfo = new MinHeap();
     }
 
-    public void processDecodingInfo(String filename) throws FileNotFoundException {
-        File file = new File(filename);
+    public void processDecodingInfo(File decodingInfo) throws FileNotFoundException {
+        File file = decodingInfo;
         Scanner input = new Scanner(file);
 
         String info = "";
+        String bitCount = "";
+        boolean isBitCountFetched = false;
+
+
         while (input.hasNext()) {
             String cur = input.nextLine();
 
-            for (int i = 0; i < cur.length(); i++) {
-                info += cur.charAt(i);
-            }
+            if (!isBitCountFetched) {
+                for (int i = 0; i < cur.length(); i++) {
+                    bitCount += cur.charAt(i);
 
-            info += '\n';
+                }
+                isBitCountFetched = true;
+
+            } else {
+                for (int i = 0; i < cur.length(); i++) {
+                    info += cur.charAt(i);
+                }
+
+                info += '\n';
+
+            }
         }
 
+        this.bitCount = Integer.parseInt(bitCount);
         String[] nodeIndex;
         nodeIndex = info.split("<-");
 
@@ -68,9 +86,15 @@ public class HuffmanEncoder {
         return cur;
     }
 
-    public void decode() throws IOException {
-        File compressedFile = new File("compressed.dat");
-        File unzippedFile = new File("unzipped.txt");
+    public void decode(File compressedFile) throws IOException {
+        String unzippedFileName = FileNameEditor.addBack(compressedFile.getName(),"Unzipped");
+        unzippedFileName = FileNameEditor.changeSuffix(unzippedFileName, "txt");
+
+        if(FileNameEditor.isFileNameRepeated(unzippedFileName)) {
+            unzippedFileName = FileNameEditor.renameRepeatedFile(unzippedFileName);
+        }
+
+        File unzippedFile = new File(unzippedFileName);
 
         FileInputStream input = new FileInputStream(compressedFile);
         PrintWriter output  = new PrintWriter(unzippedFile);
@@ -116,7 +140,11 @@ public class HuffmanEncoder {
         assignCode();
         Scanner input = new Scanner(originFile);
 
-        String name = "compressed.dat";
+        String name = FileNameEditor.changeSuffix(originFile.getName(), "dat");
+
+        if (FileNameEditor.isFileNameRepeated(name)) {
+            name = FileNameEditor.renameRepeatedFile(name);
+        }
 
         File file = new File(name);
         FileOutputStream output = new FileOutputStream(file);
@@ -175,7 +203,8 @@ public class HuffmanEncoder {
         }
 
         output.write(encoding);
-        storeHuffmanTree();
+        storeHuffmanTree(name);
+        output.close();
 
     }
 
@@ -277,14 +306,20 @@ public class HuffmanEncoder {
 
     }
 
-    private void storeHuffmanTree() throws FileNotFoundException {
-        String name = originFile.getName();
-        name = FileNameEditor.addBack(name,"DecodeInfo");
+    private void storeHuffmanTree(String compressedFileName) throws FileNotFoundException {
+        String name = FileNameEditor.addBack(compressedFileName,"DecodingInfo");
+
+        name = FileNameEditor.changeSuffix(name, "txt");
+
+        if (FileNameEditor.isFileNameRepeated(name)) {
+            name = FileNameEditor.renameRepeatedFile(name);
+        }
 
         File file = new File(name);
 
         PrintWriter output = new PrintWriter(file);
 
+        output.print(bitCount + "\n");
         output.print(huffmanTree.reverseLevelOrder());
         output.close();
 
@@ -308,14 +343,12 @@ public class HuffmanEncoder {
     }
 
 
+    /*
     public static void main(String[] args) throws IOException {
         File file = new File("simple.txt");
         HuffmanEncoder h = new HuffmanEncoder(file);
 
         h.encode();
-
-
-        File b = new File("compressed.dat");
 
 
         h.decode();
@@ -325,6 +358,7 @@ public class HuffmanEncoder {
         h.decode();
 
     }
+    */
 
 
 }
