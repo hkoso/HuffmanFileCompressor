@@ -9,6 +9,21 @@ public class FileNameEditor {
     public FileNameEditor() {
     }
 
+    public static boolean hasSuffix(String fileName, String suffix) {
+
+        int suffixPosition = findSuffixPosition(fileName);
+        if(suffixPosition == 0) {
+            return false;
+        }
+
+
+
+        String curSuffix = fileName.substring(suffixPosition);
+        return curSuffix.equals(suffix);
+
+
+    }
+
     public static String addFront(String fileName, String text) {
         return text + fileName;
 
