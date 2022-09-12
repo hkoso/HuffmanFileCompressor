@@ -3,7 +3,9 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 public class CompressorGUIPanel extends JFrame {
 
@@ -75,8 +77,8 @@ public class CompressorGUIPanel extends JFrame {
 
         JPanel textProcessing = new JPanel();
         textProcessing.setLayout(new FlowLayout());
-        textProcessing.add(compress);
         textProcessing.add(saveAndCompress);
+        textProcessing.add(compress);
         textProcessing.add(unzip);
 
         compress.addActionListener(operations);
@@ -104,13 +106,18 @@ public class CompressorGUIPanel extends JFrame {
             if(e.getSource() == compress) {
                 System.out.println("compress");
                 try {
-                    compress(writingMode.isSelected());
+                    compress();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
             }
             else if(e.getSource() == saveAndCompress) {
                 System.out.println("save");
+                try {
+                    saveAndCompress();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
             else if(e.getSource() == unzip) {
                 System.out.println("unzip");
@@ -145,22 +152,66 @@ public class CompressorGUIPanel extends JFrame {
         File decodingFile = new File(decodeFileAddressInput.getText());
         File compressedFile = new File(textFileAddressInput.getText());
 
+        if(!decodingFile.exists() || !compressedFile.exists()) {
+            FileNotExistMessage fileNotExistMessage = new FileNotExistMessage();
+        }
+
         HuffmanEncoder decoder = new HuffmanEncoder();
         decoder.processDecodingInfo(decodingFile);
         decoder.decode(compressedFile);
+
+        FileSavedMessage confirm = new FileSavedMessage();
+
     }
 
-    private void compress(boolean isInWritingMode) throws IOException {
-        if(isInWritingMode) {
+    private void compress() throws IOException {
+        File file = new File(textFileAddressInput.getText());
 
+        if(!file.exists()) {
+            FileNotExistMessage fileNotExistMessage = new FileNotExistMessage();
+        }
+
+        HuffmanEncoder encoder = new HuffmanEncoder(file);
+        encoder.encode();
+
+        FileSavedMessage confirm = new FileSavedMessage();
+
+    }
+
+    private void saveAndCompress () throws IOException {
+
+        String filename = fileNameInput.getText();
+        FileNameEditor.hasSuffix(filename, ".txt");
+
+        if(FileNameEditor.findSuffixPosition(filename) == 0) {
+            filename += ".txt";
         }
         else {
-           File file = new File(textFileAddressInput.getText());
-           HuffmanEncoder encoder = new HuffmanEncoder(file);
-           encoder.encode();
+            FileNameEditor.changeSuffix(filename, ".txt");
         }
-    }
 
+        if(FileNameEditor.isFileNameRepeated(filename)) {
+            filename = FileNameEditor.renameRepeatedFile(filename);
+        }
+
+        File file = new File(filename);
+        PrintWriter output = new PrintWriter(file);
+
+        output.print(textInput.getText());
+
+        output.close();
+
+        HuffmanEncoder encoder = new HuffmanEncoder(file);
+
+        encoder.encode();
+
+        output.close();
+
+        FileSavedMessage confirm = new FileSavedMessage();
+
+
+
+    }
 
     private void unzippingMode() {
         compress.setEnabled(false);
@@ -203,8 +254,8 @@ public class CompressorGUIPanel extends JFrame {
         fileNameInput.setEnabled(true);
         fileNameInput.setBackground(Color.WHITE);
 
-        compress.setEnabled(true);
         saveAndCompress.setEnabled(true);
+        compress.setEnabled(false);
         unzip.setEnabled(false);
 
         textFileAddressInput.setEnabled(false);
