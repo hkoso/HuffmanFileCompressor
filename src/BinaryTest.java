@@ -1,24 +1,40 @@
 import java.io.*;
+import java.util.Scanner;
 
 public class BinaryTest {
 
     public static void main(String[] args) throws IOException {
-        File file = new File("test.dat");
-        FileOutputStream output = new FileOutputStream(file);
+        File file = new File("simpleDecodingInfo.txt");
 
-        boolean l = '\n' == '\u0000';
-        char i = '\n';
-        byte b = (byte) 0b10000000;
+        Scanner input = new Scanner(file);
+        boolean isBitCountFetched = false;
 
-        System.out.print(l);
+        String bitLength = "";
+        String info = "";
 
-        FileInputStream input = new FileInputStream(file);
-        File unzippedFile = new File("unzipped.txt");
-        PrintWriter output1  = new PrintWriter(unzippedFile);
+        while (input.hasNext()) {
+            String cur = input.nextLine();
 
-        output1.print(i);
-        output1.print("ha");
+            if(!isBitCountFetched) {
+                for (int i = 0; i < cur.length(); i++) {
+                    bitLength += cur.charAt(i);
+                }
+                isBitCountFetched = true;
+            }
+            else {
 
-        output1.close();
+                for (int i = 0; i < cur.length(); i++) {
+                    info += cur.charAt(i);
+                }
+
+                info += '\n';
+            }
+
+        }
+
+        long b = Integer.parseInt(bitLength);
+        System.out.println(b);
+        System.out.println(info);
+
     }
 }

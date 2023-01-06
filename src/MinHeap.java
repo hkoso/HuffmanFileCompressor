@@ -4,15 +4,26 @@ public class MinHeap {
 
     private ArrayList<Node> heap;
 
-
+    // Constructs a new array-based min heap
+    // Parameters:
+    //      None
     public MinHeap(){
         heap = new ArrayList<>();
     }
 
+
+    // Insert the node and perform heap sort towards the array.
+    // If there is a node representing the same character info already in the array,
+    // the frequency of the node in the array will be incremented 1.
+    // Returns:
+    //      None
+    // Parameters:
+    //      Node: node to be added
     public void insert(Node node) {
         int repeatNode = isRepeated(node);
         if(repeatNode != -1){
             heap.get(repeatNode).setFrequency(heap.get(repeatNode).getFrequency() + 1);
+            bubbleDown(repeatNode);
             return;
         }
 
@@ -21,6 +32,12 @@ public class MinHeap {
 
     }
 
+
+    // Remove the min frequency node and perform heap sort towards the array.
+    // Returns:
+    //      Node has the least frequency
+    // Parameters:
+    //      None
     public Node removeMin() {
         Node result = heap.get(0);
 
@@ -28,11 +45,16 @@ public class MinHeap {
 
         heap.remove(heap.size() - 1);
 
-        bubbleDown();
+        bubbleDown(0);
 
         return result;
     }
 
+    // bubble up the last node in the heap array
+    // Returns:
+    //      None
+    // Parameters:
+    //      None
     private void bubbleUp() {
         int cur = heap.size() - 1;
         int parent = cur / 2;
@@ -46,8 +68,15 @@ public class MinHeap {
 
     }
 
-    private void bubbleDown() {
-        int cur = 0;
+
+
+    // bubble down the first node in the heap array
+    // Returns:
+    //      None
+    // Parameters:
+    //      int - position: position of the node to be bubbled down
+    private void bubbleDown(int position) {
+        int cur = position;
         int left = 2 * cur + 1;
         int right = 2 * cur + 2;
 
@@ -64,12 +93,28 @@ public class MinHeap {
         }
     }
 
+
+
+
+
+    // Swap the position of two node in the array
+    // Returns:
+    //      None
+    // Parameters:
+    //      cur - int: position of one node
+    //      parent - int: position of the other array
     private void swap(int cur, int parent) {
         Node temp = heap.get(cur);
         heap.set(cur, heap.get(parent));
         heap.set(parent, temp);
     }
 
+
+    // Check if the character that the node represent has already in the heap
+    // Returns:
+    //      int: position of the repeated node or -1 if there is no such node
+    // Parameters:
+    //      Node - node: node to be checked
     private int isRepeated(Node node) {
         for (int i = 0; i < heap.size(); i++) {
             if(heap.get(i).equals(node)) {
@@ -79,10 +124,24 @@ public class MinHeap {
         return -1;
     }
 
+
+
+    // Peek the first node in the heap array
+    // Returns:
+    //      Node: first node in the array
+    // Parameters:
+    //      None
     public Node peek() {
         return heap.get(0);
     }
 
+
+
+    // Get the number of Nodes in the heap
+    // Returns:
+    //      int: number of nodes in the heap
+    // Parameters:
+    //      None
     public int size() {
         return heap.size();
     }

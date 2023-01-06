@@ -17,7 +17,6 @@ public class FileNameEditor {
         }
 
 
-
         String curSuffix = fileName.substring(suffixPosition);
         return curSuffix.equals(suffix);
 
